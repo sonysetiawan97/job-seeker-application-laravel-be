@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::namespace('App\Http\Controllers')->prefix('v1')->group(function () {
+    Route::group([
+        'prefix' => 'user',
+    ], function () {
+        Route::post('register', 'AuthController@register');
+    });
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

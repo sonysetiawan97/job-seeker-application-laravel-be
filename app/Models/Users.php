@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Schema;
 use App\Observers\UsersObserver as Observer;
 use App\Traits\ObservableModel;
 
-class Users extends Resources {
+class Users extends Resources
+{
 
     use ObservableModel;
 
@@ -37,10 +38,14 @@ class Users extends Resources {
             'update' => null,
             'delete' => null,
         ],
-        'gender' => 'required|string|in:male,female',
-        'phone' => 'nullable|string',
-        'photo' => 'mimes:jpeg,jpg,png|max:1024|nullable',
-        'status' => 'required|string|in:inactive,active'
+        'gender' => 'required|string|in:male,female,hidden',
+        'dob' => 'required|date',
+        'phone' => 'required|string',
+        'residence' => 'required|string',
+        'country_id' => 'required',
+        'province_id' => 'required',
+        'city_id' => 'required',
+        'religion' => 'required|in:christian,catholic,moslem,hindu,buddha,confucianism,hidden',
     );
 
     protected $forms = array();
@@ -58,24 +63,28 @@ class Users extends Resources {
     protected $searchable = array('username',  'email', 'first_name', 'last_name', 'phone', 'status');
     protected $hidden = array('password');
 
-    public function photo() {
+    public function photo()
+    {
         return $this->belongsTo('App\Models\Files', 'foreign_id', 'id')->where('foreign_table', 'users');
     }
 
-    public function address() {
+    public function address()
+    {
         return $this->belongsTo('App\Models\Addresses', 'foreign_id', 'id')->where('foreign_table', 'users');
     }
 
-    public function roles() {
+    public function roles()
+    {
         return $this->hasMany('App\Models\ModelHasRoles', 'model_id', 'id')->where('model_type', 'App\Models\User');
     }
 
-    public function role($query, $value = 'user') {
+    public function role($query, $value = 'user')
+    {
         $roles = (array) $value;
         return $query
-                    ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
-                    ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
-                    ->whereIn('roles.name', $roles)
-                    ->select('users.*');
+            ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->whereIn('roles.name', $roles)
+            ->select('users.*');
     }
 }
