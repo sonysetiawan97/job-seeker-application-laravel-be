@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             SqlCountriesSeeder::class,
             UsersTableSeeder::class,
             RolesAndPermissionsSeeder::class,
+            CompaniesSeeder::class,
+            SkillsSeeder::class,
         ]);
     }
 }
