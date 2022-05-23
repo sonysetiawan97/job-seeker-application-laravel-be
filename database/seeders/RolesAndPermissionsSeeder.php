@@ -85,51 +85,5 @@ class RolesAndPermissionsSeeder extends Seeder
         // create roles and assign created permissions
         $role = Role::create(['name' => 'superadmin']);
         $role->givePermissionTo(['*.*.*']);
-
-        $role = Role::create(['name' => 'admin']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'operator']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'reporter']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'manager']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'hrd']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'author']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'editor']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'drafter']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'user']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'student']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $role = Role::create(['name' => 'treacher']);
-        $role->givePermissionTo(['users.read.*', 'users.update.*']);
-
-        $user = User::where('username', 'superadmin')->first();
-        $user->assignRole('superadmin');
-        $user = User::where('username', 'admin')->first();
-        $user->assignRole('admin');
-        $user = User::where('email', 'hrd@sagara.id')->first();
-        $user->assignRole('hrd');
-        $user = User::where('email', 'manager@sagara.id')->first();
-        $user->assignRole('manager');
-        $user = User::where('email', 'reporter@sagara.id')->first();
-        $user->assignRole('reporter');
-        $user = User::where('email', 'operator@sagara.id')->first();
-        $user->assignRole('operator');
     }
 }
