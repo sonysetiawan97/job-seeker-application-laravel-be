@@ -74,14 +74,16 @@ class AuthController extends Controller
 
             $model->setAttribute('status', 'active');
             $model->save();
-            $model->assignRole($userType);
+
+            $user = User::find($model['id']);
+            $user->assignRole($userType);
 
             $this->responder->set('message', 'account created!');
             $this->responder->set('data', $model);
             $this->responder->setStatus(200, 'Created.');
             return $this->responder->response();
         } catch (Exception $exception) {
-            throw $exception->getMessage();
+            throw $exception;
         }
     }
 
