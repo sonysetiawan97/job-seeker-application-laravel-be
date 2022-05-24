@@ -18,13 +18,13 @@ class CreateJobsTable extends Migration
 
             $table->string('title', 50);
             $table->foreignId('company_id')->constrained('companies');
-            $table->enum('work_location', ['who', 'wfh', 'hybrid']);
+            $table->enum('work_location', ['wfo', 'wfh', 'hybrid']);
             $table->enum('work_schedule', ['full_time', 'part_time', 'freelance']);
             $table->string('work_level', 50);
             $table->enum('education_level', ['sd', 'smp', 'sma', 's1', 's2', 's3']);
             $table->text('description');
-            $table->float('pay_range_start')->nullable();
-            $table->float('pay_range_end')->nullable();
+            $table->double('pay_range_start')->nullable();
+            $table->double('pay_range_end')->nullable();
             $table->boolean('still_hiring')->default(true);
 
             $table->timestamps();
