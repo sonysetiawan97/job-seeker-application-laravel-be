@@ -187,10 +187,16 @@ class AuthController extends Controller
         $permissions = $user->getAllPermissions();
         $permissions = Arr::pluck($permissions, 'name');
         $roles = $user->getRoleNames()->toArray();
+        $company = $user->company($user['id']);
 
         $this->responder->set('collection', 'User');
         $this->responder->set('message', 'Data retrieved');
-        $this->responder->set('data', $user);
+        $this->responder->set('data', [
+            'user' => $user,
+            'permissions' => $permissions,
+            'roles' => $roles,
+            'company' => $company,
+        ]);
         $this->responder->set('permissions', $permissions);
         $this->responder->set('roles', $roles);
         return $this->responder->response();
