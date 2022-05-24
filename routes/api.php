@@ -60,6 +60,13 @@ Route::namespace('App\Http\Controllers')->middleware(['api'])->prefix('v1')->gro
         });
     });
 
+    Route::group([
+        'prefix' => 'companies',
+        'middleware' => 'auth:api',
+    ], function () {
+        Route::post('register', 'Api\CompaniesController@register');
+    });
+
     Route::get("roles/{id}/permissions", 'Api\RolesResourcesController@getPermissions')->where('id', '[a-zA-Z0-9]+');
     Route::put("roles/{id}/permissions", 'Api\RolesResourcesController@updatePermissions')->where('id', '[a-zA-Z0-9]+');
 
