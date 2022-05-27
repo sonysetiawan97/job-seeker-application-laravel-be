@@ -78,6 +78,7 @@ Route::namespace('App\Http\Controllers')->middleware(['api'])->prefix('v1')->gro
         'prefix' => 'job_applicants',
         'middleware' => 'auth:api',
     ], function(){
+        Route::get('/', 'Api\JobApplicantsController@index');
         Route::post('/apply_job', 'Api\JobApplicantsController@applyJobs');
     });
 

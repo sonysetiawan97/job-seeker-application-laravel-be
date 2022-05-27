@@ -103,8 +103,6 @@ class JobsController extends ApiResourcesController
             if (in_array('recruiter', $roles)) {
                 $company = $user->company($user['id']);
             }
-            $count = $this->model->count();
-            $model = $this->model->filter();
 
             $format = $request->get('format', 'default');
 
@@ -120,17 +118,27 @@ class JobsController extends ApiResourcesController
                 $draw = $request['draw'];
             }
 
-            $modelCount = clone $model;
+            $count = $this->model->count();
+            $data = $this->model;
+
+            $relationship = $request->get('relationship');
+            if ($relationship) {
+                foreach ($relationship as $value) {
+                    $data = $data->with($value);
+                }
+            }
+
+            if ($company) {
+                $data = $data->where('company_id', $company->id);
+            }
+
+            $modelCount = clone $data;
             $meta = array(
                 'recordsTotal' => $count,
                 'recordsFiltered' => $modelCount->count()
             );
 
-            $data = $model->offset($page * $limit)->limit($limit);
-
-            if ($company) {
-                $data->where('company_id', $company->id);
-            }
+            $data = $data->offset($page * $limit)->limit($limit);
 
             $data = $data->get();
 

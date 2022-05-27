@@ -36,16 +36,21 @@ class JobApplicants extends Resources
     );
 
     protected $structures = array();
-    protected $forms = array('title', 'work_location', 'work_schedule', 'work_level');
-    protected $searchable = array('name', 'location', 'description');
+    protected $forms = array();
+    protected $searchable = array('status');
 
-    public function jobs()
+    public function job()
     {
-        return $this->hasMany(Jobs::class, 'jobs_id', 'id');
+        return $this->hasOne(Jobs::class, 'id');
     }
 
-    public function users()
+    public function user()
     {
-        return $this->hasMany(User::class, 'user_id', 'id');
+        return $this->hasOne(Users::class, 'id');
+    }
+
+    public function company()
+    {
+        return $this->hasOneThrough(Companies::class, Jobs::class, 'id', 'id', null, 'company_id');
     }
 }

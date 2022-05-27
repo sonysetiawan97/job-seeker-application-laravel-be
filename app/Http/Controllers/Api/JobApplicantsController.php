@@ -72,6 +72,99 @@ class JobApplicantsController extends ApiResourcesController
         }
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+
+        if (is_null($this->model)) {
+            $this->responder->set('message', "Model not found!");
+            $this->responder->setStatus(404, 'Not found.');
+            return $this->responder->response();
+        }
+
+        try {
+            $this->checkPermissions('index', 'read');
+        } catch (\Exception $e) {
+            $this->responder->set('message', 'You do not have authorization.');
+            $this->responder->setStatus(401, 'Unauthorized');
+            return $this->responder->response();
+        }
+
+        try {
+            $user = Auth::user();
+            $roles = $user->getRoleNames()->toArray();
+            $company = null;
+            $jobSeeker = false;
+            if (in_array('recruiter', $roles)) {
+                $company = $user->company($user['id']);
+            } else if (in_array('job_seeker', $roles)) {
+                $jobSeeker = true;
+            };
+
+            $format = $request->get('format', 'default');
+
+            $limit = intval($request->get('limit', 25));
+            if ($limit > 100) {
+                $limit = 100;
+            }
+
+            $p = intval($request->get('page', 1));
+            $page = ($p > 0 ? $p - 1 : $p);
+
+            if ($format == 'datatable') {
+                $draw = $request['draw'];
+            }
+
+            $count = $this->model->count();
+            $data = $this->model;
+
+            $relationship = $request->get('relationship');
+            if ($relationship) {
+                foreach ($relationship as $value) {
+                    $data = $data->with($value);
+                }
+            }
+
+            if ($company) {
+                $data = $data->with('job')->whereHas('job', function ($q) use ($company) {
+                    $q->where('company_id', '=', $company->id);
+                });
+            }
+
+            if ($jobSeeker) {
+                $data = $data->where('user_id', '=', $user->id);
+            }
+
+            $modelCount = clone $data;
+            $meta = array(
+                'recordsTotal' => $count,
+                'recordsFiltered' => $modelCount->count()
+            );
+
+            $data = $data->offset($page * $limit)->limit($limit);
+
+            $data = $data->get();
+
+            $this->responder->set('message', 'Data retrieved.');
+            $this->responder->set('meta', $meta);
+            $this->responder->set('data', $data);
+            if ($format == 'datatable') {
+                $this->responder->set('draw', $draw);
+                $this->responder->set('recordsFiltered', $meta['recordsFiltered']);
+                $this->responder->set('recordsTotal', $meta['recordsTotal']);
+            }
+            return $this->responder->response();
+        } catch (\Exception $e) {
+            $this->responder->set('message', $e->getMessage());
+            $this->responder->setStatus(500, 'Internal server error.');
+            return $this->responder->response();
+        }
+    }
+
     public function applyJobs(Request $request)
     {
         if (is_null($this->model)) {
@@ -112,7 +205,7 @@ class JobApplicantsController extends ApiResourcesController
                 return $this->responder->response();
             }
             $jobId = $job->id;
-            
+
             $isApply = $this->isApply($jobId, $userId);
             if (!is_null($isApply)) {
                 $this->responder->set('message', 'Job Already applied.');

@@ -46,4 +46,9 @@ class Jobs extends Resources
     protected $forms = array('title', 'work_location', 'work_schedule', 'work_level');
 
     protected $searchable = array('name', 'location', 'description');
+
+    public function company()
+    {
+        return $this->hasOne(Companies::class, 'id', 'company_id');
+    }
 }
