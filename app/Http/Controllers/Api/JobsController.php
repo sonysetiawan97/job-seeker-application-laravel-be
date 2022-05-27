@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Resources;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use App\Services\ResponseService;
+use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class CompaniesController extends ApiResourcesController
+class JobsController extends ApiResourcesController
 {
     protected $table_name = null;
     protected $model = null;
@@ -58,6 +59,7 @@ class CompaniesController extends ApiResourcesController
 
     protected function checkPermissions($authenticatedRoute, $authorize)
     {
+        $user = Auth::user();
         if (in_array($authenticatedRoute, $this->model->getAuthenticatedRoutes())) {
             $table = $this->model->getTable();
             $generatedPermissions = [$table . '.*.*', $table . '.' . $authorize . '.*'];
@@ -76,35 +78,70 @@ class CompaniesController extends ApiResourcesController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function register(Request $request)
+    public function index(Request $request)
     {
 
-        // if (is_null($this->model)) {
-        //     $this->responder->set('message', "Model not found!");
-        //     $this->responder->setStatus(404, 'Not found.');
-        //     return $this->responder->response();
-        // }
+        if (is_null($this->model)) {
+            $this->responder->set('message', "Model not found!");
+            $this->responder->setStatus(404, 'Not found.');
+            return $this->responder->response();
+        }
 
-        // try {
-        //     $this->checkPermissions('store', 'create');
-        // } catch (\Exception $e) {
-        //     $this->responder->set('message', 'You do not have authorization.');
-        //     $this->responder->setStatus(401, 'Unauthorized');
-        //     return $this->responder->response();
-        // }
+        try {
+            $this->checkPermissions('index', 'read');
+        } catch (\Exception $e) {
+            $this->responder->set('message', 'You do not have authorization.');
+            $this->responder->setStatus(401, 'Unauthorized');
+            return $this->responder->response();
+        }
 
         try {
             $user = Auth::user();
-            $fields = $request->only('company_id');
-            $fields['user_id'] = $user['id'];
-            $fields['created_at'] = date('Y-m-d H:i:s');
-            $fields['updated_at'] = date('Y-m-d H:i:s');
+            $roles = $user->getRoleNames()->toArray();
+            $company = null;
 
-            $model = DB::table('user_company')->insert($fields);
+            if (in_array('recruiter', $roles)) {
+                $company = $user->company($user['id']);
+            }
+            $count = $this->model->count();
+            $model = $this->model->filter();
 
-            $this->responder->set('message', 'company changed.');
-            $this->responder->set('data', $fields);
-            $this->responder->setStatus(201, 'Created.');
+            $format = $request->get('format', 'default');
+
+            $limit = intval($request->get('limit', 25));
+            if ($limit > 100) {
+                $limit = 100;
+            }
+
+            $p = intval($request->get('page', 1));
+            $page = ($p > 0 ? $p - 1 : $p);
+
+            if ($format == 'datatable') {
+                $draw = $request['draw'];
+            }
+
+            $modelCount = clone $model;
+            $meta = array(
+                'recordsTotal' => $count,
+                'recordsFiltered' => $modelCount->count()
+            );
+
+            $data = $model->offset($page * $limit)->limit($limit);
+
+            if ($company) {
+                $data->where('company_id', $company->id);
+            }
+
+            $data = $data->get();
+
+            $this->responder->set('message', 'Data retrieved.');
+            $this->responder->set('meta', $meta);
+            $this->responder->set('data', $data);
+            if ($format == 'datatable') {
+                $this->responder->set('draw', $draw);
+                $this->responder->set('recordsFiltered', $meta['recordsFiltered']);
+                $this->responder->set('recordsTotal', $meta['recordsTotal']);
+            }
             return $this->responder->response();
         } catch (\Exception $e) {
             $this->responder->set('message', $e->getMessage());

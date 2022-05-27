@@ -13,7 +13,7 @@ class CreateJobApplicantTable extends Migration
      */
     public function up()
     {
-        Schema::create('job_applicant', function (Blueprint $table) {
+        Schema::create('job_applicants', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('job_id')->constrained('jobs');
@@ -32,6 +32,6 @@ class CreateJobApplicantTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('job_applicant');
+        Schema::dropIfExists('job_applicants');
     }
 }

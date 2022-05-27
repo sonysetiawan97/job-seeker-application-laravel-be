@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -32,7 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
          * users.create.role:user
          * the permission pattern above, user only has permission on users table
          * on event create or insert new data, with type role is user
-        */
+         */
 
         Permission::create(['name' => '*.*.*']);          // Superadministrator permissions
         Permission::create(['name' => '*.create.*']);     // Create and Store data
@@ -50,33 +51,33 @@ class RolesAndPermissionsSeeder extends Seeder
 
         foreach ($structures as $key => $table) {
             // create permissions
-            Permission::create(['name' => $table.'.create.*']);
-            Permission::create(['name' => $table.'.read.*']);
-            Permission::create(['name' => $table.'.update.*']);
-            Permission::create(['name' => $table.'.restore.*']);
-            Permission::create(['name' => $table.'.destroy.*']);
-            Permission::create(['name' => $table.'.delete.*']);
-            Permission::create(['name' => $table.'.trash.*']);
-            Permission::create(['name' => $table.'.empty.*']);
-            Permission::create(['name' => $table.'.import.*']);
-            Permission::create(['name' => $table.'.export.*']);
-            Permission::create(['name' => $table.'.report.*']);
+            Permission::create(['name' => $table . '.create.*']);
+            Permission::create(['name' => $table . '.read.*']);
+            Permission::create(['name' => $table . '.update.*']);
+            Permission::create(['name' => $table . '.restore.*']);
+            Permission::create(['name' => $table . '.destroy.*']);
+            Permission::create(['name' => $table . '.delete.*']);
+            Permission::create(['name' => $table . '.trash.*']);
+            Permission::create(['name' => $table . '.empty.*']);
+            Permission::create(['name' => $table . '.import.*']);
+            Permission::create(['name' => $table . '.export.*']);
+            Permission::create(['name' => $table . '.report.*']);
 
             // NOTE: *.*.id should be their (user) own data
-            Permission::create(['name' => $table.'.create.id']);
-            Permission::create(['name' => $table.'.read.id']);
-            Permission::create(['name' => $table.'.update.id']);
-            Permission::create(['name' => $table.'.restore.id']);
-            Permission::create(['name' => $table.'.destroy.id']);
-            Permission::create(['name' => $table.'.delete.id']);
-            Permission::create(['name' => $table.'.trash.id']);
-            Permission::create(['name' => $table.'.empty.id']);
-            Permission::create(['name' => $table.'.import.id']);
-            Permission::create(['name' => $table.'.export.id']);
-            Permission::create(['name' => $table.'.report.id']);
+            Permission::create(['name' => $table . '.create.id']);
+            Permission::create(['name' => $table . '.read.id']);
+            Permission::create(['name' => $table . '.update.id']);
+            Permission::create(['name' => $table . '.restore.id']);
+            Permission::create(['name' => $table . '.destroy.id']);
+            Permission::create(['name' => $table . '.delete.id']);
+            Permission::create(['name' => $table . '.trash.id']);
+            Permission::create(['name' => $table . '.empty.id']);
+            Permission::create(['name' => $table . '.import.id']);
+            Permission::create(['name' => $table . '.export.id']);
+            Permission::create(['name' => $table . '.report.id']);
 
-            Permission::create(['name' => $table.'.page.*']);
-            Permission::create(['name' => $table.'.*.*']); // all permission only for this model
+            Permission::create(['name' => $table . '.page.*']);
+            Permission::create(['name' => $table . '.*.*']); // all permission only for this model
         }
 
         Permission::create(['name' => 'users.account.activate']);
@@ -88,12 +89,20 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ROLE: job_seeker
         $role = Role::create(['name' => 'job_seeker']);
+        $role->givePermissionTo(['jobs.read.*']);
+        $role->givePermissionTo(['job_applicants.*.*']);
 
         // ROLE: recruiter
         $role = Role::create(['name' => 'recruiter']);
+        $role->givePermissionTo(['jobs.*.*']);
+        $role->givePermissionTo(['job_applicants.*.*']);
 
         // ASSIGN ROLE
         $user = User::where('username', 'superadmin')->first();
         $user->assignRole('superadmin');
+        $user = User::where('username', 'job.seeker.1')->first();
+        $user->assignRole('job_seeker');
+        $user = User::where('username', 'recruiter.1')->first();
+        $user->assignRole('recruiter');
     }
 }
