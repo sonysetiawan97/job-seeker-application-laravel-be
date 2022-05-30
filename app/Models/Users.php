@@ -75,7 +75,12 @@ class Users extends Resources
 
     public function roles()
     {
-        return $this->hasMany('App\Models\ModelHasRoles', 'model_id', 'id')->where('model_type', 'App\Models\User');
+        return $this->hasMany(ModelHasRoles::class, 'model_id', 'id')->with('role')->where('model_type', 'App\Models\User');
+    }
+
+    public function cv()
+    {
+        return $this->hasOneThrough(Files::class, UserDocuments::class, 'user_id', 'id', null, 'file_id')->where('user_documents.type', '=', 'cv')->whereNull('files.deleted_at');
     }
 
     public function role($query, $value = 'user')

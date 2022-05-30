@@ -12,6 +12,22 @@ class Roles extends Resources
 {
     protected $table = 'roles';
 
+    protected $auths = array (
+        // 'index',
+        'store',
+        // 'show',
+        'update',
+        'patch',
+        'destroy',
+        'trash',
+        'trashed',
+        'restore',
+        'delete',
+        'import',
+        'export',
+        'report'
+    );
+
     protected $rules = array(
         "name" => 'required|string',
         "guard_name" => 'required|string',

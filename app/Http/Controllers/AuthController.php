@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Events\UserCheck;
+use App\Models\UserDocuments;
+use App\Services\Filestore;
 use Illuminate\Support\Arr;
 use DB;
 use Curl;
@@ -215,18 +217,18 @@ class AuthController extends Controller
     {
 
         try {
+            $user = Auth::user();
 
-            $rules = [
-                "email" => "required|email",
-                "first_name" => "required|string",
-                "last_name" => "required|string",
-                "dob" => "required|date",
-                "gender" => "required|string",
-                "phone" => "required|string",
-                "address" => "nullable|array"
-            ];
+            if (is_null($user)) {
+                $this->responder->setStatus(404, 'User Not Found');
+                $this->responder->set('message', "User Not Found.");
+                return $this->responder->response();
+            }
 
-            $validator = Validator::make($request->all(), $rules, $this->messages);
+            $users = Users::find($user->id);
+            $rules = $users->getValidationOf('update', $user->id);
+
+            $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 $this->responder->set('errors', $validator->errors());
                 $this->responder->setStatus(400, 'Bad Request');
@@ -234,43 +236,49 @@ class AuthController extends Controller
                 return $this->responder->response();
             }
 
-            $user = Auth::user();
-            $fields = $request->only([
-                "email",
-                "first_name",
-                "last_name",
-                "dob",
-                "gender",
-                "phone"
-            ]);
-            foreach ($fields as $key => $value) {
-                $user->setAttribute($key, $value);
-            }
-            $user->save();
-
-            if ($request->has('address')) {
-                $address = Addresses::where('foreign_id', $user->id)
-                    ->where('foreign_table', 'users')
-                    ->first();
-
-                if (is_null($address)) {
-                    $address = new Addresses();
-                }
-
-                $data = array_merge($request->get('address'), [
+            if ($request->has('cv')) {
+                $params = [
+                    'foreign_table' => 'users',
                     'foreign_id' => $user->id,
-                    'foreign_table' => 'users'
-                ]);
-
-                foreach ($data as $key => $value) {
-                    $address->setAttribute($key, $value);
+                    'directory' => 'users/profile/cv',
+                    'type' => 'document',
+                ];
+                $data = (array) Filestore::create($request->file('cv'), $params);
+                $files = new Files();
+                foreach ($params as $key => $value) {
+                    $files = $files->where($key, '=', $value);
                 }
-                $address->save();
+                $files = $files->first();
+                if (is_null($files)) {
+                    $files = new Files();
+                }
+                foreach ($data as $key => $value) {
+                    $files->setAttribute($key, $value);
+                }
+                $files->save();
+                $userDocuments = UserDocuments::where('type', '=', 'cv')->where('user_id', '=', $user->id)->first();
+                if (is_null($userDocuments)) {
+                    $userDocuments = new UserDocuments();
+                }
+                $userDocuments->setAttribute('type', 'cv');
+                $userDocuments->setAttribute('user_id', $user->id);
+                $userDocuments->setAttribute('file_id', $files->id);
+                $userDocuments->save();
             }
+
+            $fields = $request->except("status", "_method", "password", "roles", "cv");
+
+            foreach ($fields as $key => $value) {
+                $users->setAttribute($key, $value);
+            }
+            $users->save();
 
             $this->responder->setStatus(200, 'Ok');
             $this->responder->set('message', 'Profile updated');
-            $this->responder->set('data', $user);
+            $this->responder->set('data', [
+                'user' => $user,
+                'files' => $files,
+            ]);
             return $this->responder->response();
         } catch (\Exception $e) {
             $this->responder->set('message', $e->getMessage());
