@@ -83,6 +83,14 @@ class Users extends Resources
         return $this->hasOneThrough(Files::class, UserDocuments::class, 'user_id', 'id', null, 'file_id')->where('user_documents.type', '=', 'cv')->whereNull('files.deleted_at');
     }
 
+    public function experiences(){
+        return $this->hasMany(UserExperiences::class, 'user_id', 'id');
+    }
+
+    public function skills(){
+        return $this->hasManyThrough(Skills::class, UserSkill::class, 'user_id', 'id', null, 'skill_id');
+    }
+
     public function role($query, $value = 'user')
     {
         $roles = (array) $value;

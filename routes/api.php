@@ -77,9 +77,16 @@ Route::namespace('App\Http\Controllers')->middleware(['api'])->prefix('v1')->gro
     Route::group([
         'prefix' => 'job_applicants',
         'middleware' => 'auth:api',
-    ], function(){
+    ], function () {
         Route::get('/', 'Api\JobApplicantsController@index');
         Route::post('/apply_job', 'Api\JobApplicantsController@applyJobs');
+    });
+
+    Route::group([
+        'prefix' => 'user_skill',
+        'middleware' => 'auth:api',
+    ], function () {
+        Route::post('/update_skill', 'Api\UserSkillController@updateSkill');
     });
 
     Route::get("roles/{id}/permissions", 'Api\RolesResourcesController@getPermissions')->where('id', '[a-zA-Z0-9]+');

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             CompaniesSeeder::class,
             SkillsSeeder::class,
+            JobsSeeder::class,
         ]);
     }
 }

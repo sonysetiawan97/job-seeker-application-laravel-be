@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUserEducationTable extends Migration
+class CreateUserEducationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateUserEducationTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_education', function (Blueprint $table) {
+        Schema::create('user_educations', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('user_id')->constrained('users');
@@ -38,6 +38,6 @@ class CreateUserEducationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_education');
+        Schema::dropIfExists('user_educations');
     }
 }

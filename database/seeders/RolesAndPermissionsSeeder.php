@@ -82,6 +82,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Permission::create(['name' => 'users.account.activate']);
         Permission::create(['name' => 'users.account.deactivate']);
+        Permission::create(['name' => 'profile.*.*']);
 
         // create roles and assign created permissions
         $role = Role::create(['name' => 'superadmin']);
@@ -91,11 +92,15 @@ class RolesAndPermissionsSeeder extends Seeder
         $role = Role::create(['name' => 'job_seeker']);
         $role->givePermissionTo(['jobs.read.*']);
         $role->givePermissionTo(['job_applicants.*.*']);
+        $role->givePermissionTo(['profile.*.*']);
+        $role->givePermissionTo(['user_experiences.*.*']);
+        $role->givePermissionTo(['user_skill.*.*']);
 
         // ROLE: recruiter
         $role = Role::create(['name' => 'recruiter']);
         $role->givePermissionTo(['jobs.*.*']);
         $role->givePermissionTo(['job_applicants.*.*']);
+        $role->givePermissionTo(['profile.*.*']);
 
         // ASSIGN ROLE
         $user = User::where('username', 'superadmin')->first();
